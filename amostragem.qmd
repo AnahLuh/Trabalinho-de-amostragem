@@ -1,0 +1,96 @@
+---
+title: "Trabalho Amostragem"
+format: html
+editor: visual
+---
+
+## Baixando os pacotes
+
+```{r}
+library(pacman)
+p_load(FactoMineR, factoextra, amap, ade4, openxlsx,
+       ggrepel, HH, likert, janitor, reshape2,RColorBrewer,
+       plyr,psych,lavaan, semPlot, conover.test, ca, jtools, stringr, tidyverse, knitr, samplingbook)
+```
+
+## Lendo o banco
+
+```{r}
+banco <- read.xlsx("Amostrando.xlsx")
+```
+
+## Gráfico de Pizza da quantidade de livros por estado na amostra
+```{r}
+contagem <- banco |>
+  group_by(avaria) |>
+  summarise(Freq = n()) |>
+  mutate(Prop = round(100 * (Freq / sum(Freq)), 2)) |>
+  arrange(desc(avaria)) |>
+  mutate(posicao = cumsum(Prop) - 0.5 * Prop,
+         ymax = cumsum(Prop),
+         ymin = c(0, head(ymax, n=-1)))
+
+ggplot(contagem) +
+  aes(
+    x = factor(""),
+    y = Prop,
+    fill = factor(avaria)) +
+  geom_bar(width = 1, stat = "identity") +
+  coord_polar(theta = "y") +
+  scale_x_discrete() +
+  geom_text(
+    aes(x = 1.8, y = posicao, label = paste0(Freq/100)),
+    color = "#000000") +
+  theme_void()+
+  theme(legend.position = "right") +
+  scale_fill_manual(values = c("dark red", "dark blue"), name = 'Avaria')
+```
+
+
+
+## Construindo tabela de contingência
+
+```{r}
+contingencia <- table(banco$avaria, banco$quem.coletou)
+```
+
+
+## Teste Qui-Quadrado de homogeneidade
+
+```{r}
+contingencia
+chisq.test(contingencia)
+```
+## Gráfico de Colunas empilhadas da quantidade de livros por estado em cada amostra
+```{r}
+ggplot(banco, aes(x = quem.coletou, fill = factor(avaria))) +
+  geom_bar() +
+  labs(x = "Quem Coletou",
+       y = "Frequência") +
+  scale_fill_manual(values = c("0" = "dark red", "1" = "dark blue"), name = "Avaria")+
+  theme_light()
+```
+
+## Variância de P
+
+```{r}
+n = 100
+p = 0.52
+q = 0.48
+
+variancia <- sqrt((p*q)/n)
+variancia
+```
+
+
+```{r}
+Sprop(banco$avaria)
+```
+
+
+## Erro amostral (fórmula usada pois 0.25 \< p \< 0.75)
+
+```{r}
+erro <- sqrt(1/n)
+erro
+```
