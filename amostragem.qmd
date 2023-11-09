@@ -82,7 +82,7 @@ variancia <- sqrt((p*q)/n)
 variancia
 ```
 
-
+## Intervalo de confiança de P
 ```{r}
 Sprop(banco$avaria)
 ```
