@@ -19,8 +19,13 @@ p_load(FactoMineR, factoextra, amap, ade4, openxlsx,
 banco <- read.xlsx("Amostrando (1).xlsx")
 ```
 
-## Gráfico de Pizza da quantidade de livros por estado na amostra
 
+```{r}
+banco$avaria <- ifelse(banco$avaria == 0, "Não tem avaria", "Tem avaria")
+
+```
+
+## Gráfico de Pizza da quantidade de livros por estado na amostra
 ```{r}
 contagem <- banco |>
   group_by(avaria) |>
@@ -40,19 +45,21 @@ ggplot(contagem) +
   coord_polar(theta = "y") +
   scale_x_discrete() +
   geom_text(
-    aes(x = 1.8, y = posicao, label = paste0(Freq/100)),
+    aes(x = 1.8, y = posicao, label = paste0(Freq, "%")),
     color = "#000000") +
   theme_void()+
   theme(legend.position = "right") +
-  scale_fill_manual(values = c("dark red", "dark blue"), name = 'Avaria')
+  scale_fill_manual(values = c("#366092", "#FF8F1F"), name = 'Avaria')
 ```
+
+
 
 ## Construindo tabela de contingência
 
 ```{r}
 contingencia <- table(banco$avaria, banco$quem.coletou)
-xtable(contingencia)
 ```
+
 
 ## Teste Qui-Quadrado de homogeneidade
 
@@ -60,15 +67,13 @@ xtable(contingencia)
 contingencia
 chisq.test(contingencia)
 ```
-
 ## Gráfico de Colunas empilhadas da quantidade de livros por estado em cada amostra
-
 ```{r}
 ggplot(banco, aes(x = quem.coletou, fill = factor(avaria))) +
   geom_bar() +
   labs(x = "Quem Coletou",
        y = "Frequência") +
-  scale_fill_manual(values = c("0" = "dark red", "1" = "dark blue"), name = "Avaria")+
+  scale_fill_manual(values = c("Não tem avaria" = "#366092", "Tem avaria" = "#FF8F1F"), name = "Avaria")+
   theme_light()
 ```
 
@@ -76,18 +81,21 @@ ggplot(banco, aes(x = quem.coletou, fill = factor(avaria))) +
 
 ```{r}
 n = 100
-p = 0.52
-q = 0.48
+q = 0.52
+p = 0.48
 
-variancia <- sqrt((p*q)/n)
+variancia <- (p*q)/(n-1)
 variancia
 ```
 
-## Intervalo de confiança de P
+## Intervalo de confiança
 
 ```{r}
-Sprop(banco$avaria)
+IC = c(p - 1.96*(sqrt(variancia)), p + 1.96*(sqrt(variancia)))
+IC
 ```
+
+
 
 ## Erro amostral (fórmula usada pois 0.25 \< p \< 0.75)
 
@@ -95,6 +103,7 @@ Sprop(banco$avaria)
 erro <- sqrt(1/n)
 erro
 ```
+
 
 Teste de Kruskal-Wallis
 
